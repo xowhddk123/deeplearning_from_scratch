@@ -4,7 +4,15 @@ import numpy as np
 
 
 class Variable:
-    def __init__(self, data):
+    def __init__(self, data):  # magic method
+        '''
+        __init__ 과 같은 형태의 함수를 magic method라고 한다. 
+        magic method는 파이썬에 빌트인으로 이미 만들어진 함수들이다.
+        '''
+        if data is not None:
+            if not isinstance(data, np.ndarray):
+                raise TypeError('{}은(는) 지원하지 않습니다.'.format(type(data)))
+
         self.data = data
         self.grad = None  # step06
         self.creator = None
@@ -13,6 +21,9 @@ class Variable:
         self.creator = func  # step07
 
     def backward(self):
+        if self.grad is None:
+            self.grad = np.ones_like(self.data)
+
         funcs = [self.creator]  # 1.함수를 가져온다.
         while funcs:
             f = funcs.pop()
@@ -21,6 +32,12 @@ class Variable:
             if x.creator is not None:
                 funcs.append(x.creator)
 
+
+def as_array(x):
+    if np.isscalar(x):
+        return np.array(x)
+    return x
+
 # step02
 
 
@@ -28,7 +45,7 @@ class Function:
     def __call__(self, input):
         x = input.data  # 데이터를 꺼낸다.
         y = self.forward(x)  # 구체적인 계산은 forward method에서 한다.
-        output = Variable(y)  # variable 형태로 되돌린다.
+        output = Variable(as_array(y))  # variable 형태로 되돌린다.
         output.set_creator(self)  # 출력 변수에 창조자를 설정한다.
         self.input = input  # 입력변수를 저장
         self.output = output  # 출력도 저장한다.
@@ -65,6 +82,8 @@ class Exp(Function):
         return gx
 
 # step04
+
+# 수치 미분
 
 
 def numerical_diff(f, x, eps=1e-4):
