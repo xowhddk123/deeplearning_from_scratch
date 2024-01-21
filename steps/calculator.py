@@ -21,6 +21,9 @@ class Variable:
         self.creator = func  # step07
 
     def backward(self):
+        '''
+        최종 출력의 미분값을 1로 자동 지정한다. 
+        '''
         if self.grad is None:
             self.grad = np.ones_like(self.data)
 
@@ -99,3 +102,14 @@ def f(x):
     B = Exp()
     C = Square()
     return C(B(A(x)))
+
+
+# step 09
+def square(x):
+    f = Square()
+    return f(x)
+
+
+def exp(x):
+    f = Exp()
+    return f(x)
